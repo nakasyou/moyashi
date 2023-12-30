@@ -1,5 +1,9 @@
 import { mod } from "../src"
+import { authMod } from "./auth/auth.mod"
 
 export const appMod = mod({
-  base: '/'
-})
+  basePath: '/',
+  mods: {
+    auth: authMod
+  }
+} as const)

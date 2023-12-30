@@ -1,4 +1,9 @@
-export interface Mod {
-  
+type Mods = {
+  [aaaa: string]: Mod
 }
-export const mod = (mod: Mod) => mod
+
+export interface Mod {
+  basePath: string
+  mods: Mods
+}
+export const mod = <T extends Mod>(mod: T): T => mod
