@@ -12,4 +12,3 @@ export const AppRoutes = class extends routes(appSpecs) implements Routes<typeof
       return c.text('a')
     })
 }
-export const appRoutes = new AppRoutes()

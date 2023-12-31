@@ -25,12 +25,13 @@ export type RouteStack<Path extends string, SpecType extends Spec> = {
   routeData: RouteData
 }
 
-type ExtendedContext<Path extends string, MethodType extends Method, SpecType extends Spec> = Omit<Context<Env, Path>, 'json'> & {
+type Promiseable<T> = Promise<T> | T
+export type ExtendedContext<Path extends string, MethodType extends Method, SpecType extends Spec> = Omit<Context<Env, Path>, 'json'> & {
   json <T extends undefined extends Exclude<SpecType[MethodType], undefined>['o']['json'] ? never : v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['o']['json'], undefined>>> (data: T): JsonResponse<T>
 }
-type Handler<Path extends string, MethodType extends Method, SpecType extends Spec> = 
+export type Handler<Path extends string, MethodType extends Method, SpecType extends Spec> = 
   (c: ExtendedContext<Path, MethodType, SpecType>) => 
-    undefined extends Exclude<SpecType[MethodType], undefined>['o']['json'] ? Promise<Response> | Response : JsonResponse<v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['o']['json'], undefined>>>
+    undefined extends Exclude<SpecType[MethodType], undefined>['o']['json'] ? Promise<Response> | Response : Promiseable<JsonResponse<v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['o']['json'], undefined>>>>
 
 export type RouteData = {
   [K in Method]?: Handler<string, Method, Spec>
@@ -43,6 +44,7 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
   constructor () {
 
   }
+  readonly specs?: SpecsType
   route <Key extends keyof SpecsType>(): RouteStack<SpecsType[Key]['path'], SpecsType[Key]> {
     const routeData: RouteData = {
       invalid: {}
@@ -146,3 +148,4 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
     return hono
   }
 }
+export type RoutesBase = InstanceType<ReturnType<typeof routes>>

@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 export const appSpecs = specs({
   a: {
-    path: '/',
+    path: '/:aa',
 
     POST: {
       i: {
