@@ -12,7 +12,9 @@ export const appSpecs = specs({
         })
       },
       o: {
-
+        json: v.object({
+          message: v.string()
+        })
       }
     }
   }

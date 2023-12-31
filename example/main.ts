@@ -6,9 +6,7 @@ const app = new Hono()
 const moyashiHono = createHono(appMod)
 app.route('/', moyashiHono)
 
-const res = await app.request('/', {
-  method: 'POST',
-  body: `{"x": 0}`
+Bun.serve({
+  fetch: app.fetch,
+  port: 3030
 })
-
-console.log(await res.text())

@@ -1,4 +1,4 @@
-import { Context, Env, Hono } from 'hono'
+import { Context, Env, Hono, HonoRequest } from 'hono'
 import { Specs, Method, Spec, InputTargets } from '.'
 import * as v from 'valibot'
 import { emptyHono } from '../emptyrouter'
@@ -26,8 +26,14 @@ export type RouteStack<Path extends string, SpecType extends Spec> = {
 }
 
 type Promiseable<T> = Promise<T> | T
-export type ExtendedContext<Path extends string, MethodType extends Method, SpecType extends Spec> = Omit<Context<Env, Path>, 'json'> & {
+export type ExtendedContext<Path extends string, MethodType extends Method, SpecType extends Spec> = Omit<Context<Env, Path>, 'json' | 'req'> & {
   json <T extends undefined extends Exclude<SpecType[MethodType], undefined>['o']['json'] ? never : v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['o']['json'], undefined>>> (data: T): JsonResponse<T>
+  req: Omit<HonoRequest<Path>, 'json'> & {
+    json (): Promise<
+    // @ts-expect-error わからん
+      v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['i']['json'], undefined>>
+    >
+  }
 }
 export type Handler<Path extends string, MethodType extends Method, SpecType extends Spec> = 
   (c: ExtendedContext<Path, MethodType, SpecType>) => 
