@@ -1,7 +1,16 @@
 {
-  "name": "moyasi",
+  "name": "moyashi",
   "module": "./src/index.ts",
   "type": "module",
+  "version": "0.1.0",
+  "author": {
+    "name": "Shotaro Nakamura"
+  },
+  "files": ["dist"],
+  "homepage": "https://github.com/nakasyou/moyashi",
+  "repository": {
+    "url": "https://github.com/nakasyou/moyashi"
+  },
   "devDependencies": {
     "bun-types": "latest",
     "hono": "^3.11.8"
@@ -10,9 +19,29 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "dev": "bun --watch example/main.ts"
+    "dev": "bun --watch example/main.ts",
+    "build-js": "bun build src/index.ts src/client/index.ts src/emptyrouter/index.ts --target=bun --outdir=dist --external=valibot --external=hono",
+    "build-dts": "tsc --project tsconfig.build.json",
+    "build": "rm -rf dist && bun build-js && bun build-dts"
   },
   "dependencies": {
     "valibot": "^0.25.0"
+  },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./types": {
+      "types": "./dist/types/types/index.d.ts"
+    },
+    "./emptyrouter": {
+      "default": "./dist/emptyrouter/index.js",
+      "types": "./dist/types/emptyrouter/index.d.ts"
+    },
+    "./client": {
+      "default": "./dist/client/index.js",
+      "types": "./dist/types/client/index.d.ts"
+    }
   }
 }

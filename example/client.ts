@@ -1,4 +1,4 @@
-import { createClient } from '../src'
+import { createClient } from '../src/client'
 import { appMod } from './app.mod'
 
 const client = createClient<typeof appMod>('http://localhost:3030')
