@@ -1,4 +1,4 @@
-import { Specs, queries, specs } from "../../../src"
+import { specs } from "../../../src"
 import * as v from 'valibot'
 
 export const mainSpecs = specs({

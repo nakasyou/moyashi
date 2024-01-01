@@ -1,6 +1,7 @@
 import { MergePath, ParamKeys, ParamKeyToRecord } from 'hono/types'
-import { Mod, RouteStack, Routes, RoutesBase, Spec, Specs, Method, methods } from '..'
-import { Input, BaseSchema, BaseSchemaAsync } from 'valibot'
+import { Mod, Spec, Specs, Method } from '../core'
+import type { SafeValibotInput } from '../types'
+import { Input } from 'valibot'
 
 export type ClientByMod <MainMod extends Mod, NowPath extends string = MainMod['basePath']> = {
   [K in keyof MainMod['mods']]: ClientByMod<
@@ -24,8 +25,7 @@ export type FetchOpts<SpecType extends Spec, NowPath extends string, MethodType 
 } & (ParamKeys<SpecType['path']> extends never ? {} : {
   params: ParamKeyToRecord<ParamKeys<SpecType['path']>>
 }) & ('json' extends keyof NonUndefined<SpecType[MethodType]>['i'] ? {
-  // @ts-expect-error わからない
-  json: Input<NonUndefined<NonUndefined<SpecType[MethodType]>['i']['json']>>
+  json: SafeValibotInput<NonUndefined<NonUndefined<SpecType[MethodType]>['i']['json']>>
 } : {}) & ('queries' extends keyof NonUndefined<SpecType[MethodType]>['i'] ? {
   queries: Input<NonUndefined<NonUndefined<SpecType[MethodType]>['i']['queries']>>
 } : {})
@@ -37,8 +37,6 @@ export type FinalFetch<SpecType extends Spec, NowPath extends string, MethodType
 export type ClientBySpecs<SpecsType extends Specs, NowPath extends string> = {
   [K in keyof SpecsType]: ClientBySpec<SpecsType[K], NowPath>
 }
-type SafeValibotInput<T> = T extends (BaseSchema<any, any> | BaseSchemaAsync<any, any>) ? Input<T> : any
-type S = SafeValibotInput<0>
 type MoyashiClientResponse<SpecType extends Spec, NowPath extends string, MethodType extends Method> = Omit<Response, 'json'> & {
   json (): Promise<
     SafeValibotInput<NonUndefined<SpecType[MethodType]>['o']['json']>
@@ -64,7 +62,7 @@ const createClientBySpec = (base: string | URL) => {
       method,
       body
     })
-    return res as MoyashiClientResponse
+    return res as MoyashiClientResponse<any, any, any>
   }
   return new Proxy({}, {
     get: (): ClientBySpec<Spec, string> => {

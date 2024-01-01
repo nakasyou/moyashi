@@ -1,4 +1,4 @@
-import { Mod } from '.'
+import type { Mod } from './mod'
 import { emptyHono } from '../emptyrouter'
 
 export const createHono = (mod: Mod) => {

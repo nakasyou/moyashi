@@ -1,4 +1,4 @@
-import { Routes, RoutesBase } from "."
+import type { RoutesBase } from './routes'
 
 type Mods = {
   [modName: string]: Mod
