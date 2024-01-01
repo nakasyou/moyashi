@@ -1,6 +1,6 @@
 import { MergePath, ParamKeys, ParamKeyToRecord } from 'hono/types'
 import { Mod, RouteStack, Routes, RoutesBase, Spec, Specs, Method, methods } from '..'
-import { Input } from 'valibot'
+import { Input, BaseSchema, BaseSchemaAsync } from 'valibot'
 
 export type ClientByMod <MainMod extends Mod, NowPath extends string = MainMod['basePath']> = {
   [K in keyof MainMod['mods']]: ClientByMod<
@@ -19,7 +19,6 @@ type NonUndefined<T> = Exclude<T, undefined>
 export type ClientBySpec<SpecType extends Spec, NowPath extends string> = {
   [M in Method]: FinalFetch<SpecType, NowPath, M>
 }
-type X = ParamKeyToRecord<ParamKeys<'/'>>
 export type FetchOpts<SpecType extends Spec, NowPath extends string, MethodType extends Method> = {
 
 } & (ParamKeys<SpecType['path']> extends never ? {} : {
@@ -33,14 +32,17 @@ export type FetchOpts<SpecType extends Spec, NowPath extends string, MethodType 
 export type FinalFetch<SpecType extends Spec, NowPath extends string, MethodType extends Method> = (
   path: MergePath<NowPath, SpecType['path']>,
   opts: FetchOpts<SpecType, NowPath, MethodType>
-) => Promise<MoyashiClientResponse>
+) => Promise<MoyashiClientResponse<SpecType, NowPath, MethodType>>
 
 export type ClientBySpecs<SpecsType extends Specs, NowPath extends string> = {
   [K in keyof SpecsType]: ClientBySpec<SpecsType[K], NowPath>
 }
-
-type MoyashiClientResponse = Omit<Response, 'json'> & {
-  json (): Promise<Response>
+type SafeValibotInput<T> = T extends (BaseSchema<any, any> | BaseSchemaAsync<any, any>) ? Input<T> : any
+type S = SafeValibotInput<0>
+type MoyashiClientResponse<SpecType extends Spec, NowPath extends string, MethodType extends Method> = Omit<Response, 'json'> & {
+  json (): Promise<
+    SafeValibotInput<NonUndefined<SpecType[MethodType]>['o']['json']>
+  >
 }
 const createClientBySpec = (base: string | URL) => {
   /**

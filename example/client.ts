@@ -9,9 +9,8 @@ const res = await client.$app.a.POST('/:aa', {
   },
   json: {
     x: 0
-  },
-  queries: {
-    a: ['aa']
   }
 })
-console.log(await res.text())
+
+const data = await res.json()
+

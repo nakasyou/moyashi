@@ -120,14 +120,13 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
             res: queriesValided
           }
         }
+
+        const reqJson = c.req.json
+        const reqQueries = c.req.queries
         return {
           ok: true,
-          json: () => {
-            return c.req.json()
-          },
-          queries: (...data) => {
-            return c.req.queries(...data)
-          }
+          json: reqJson,
+          queries: reqQueries
         }
       }
       const handler = (method: Method) => {
@@ -140,8 +139,8 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
           c.req.json = valided.json
           // @ts-ignore
           c.req.queries = valided.queries
-
-          return await (routeData[method] as Exclude<typeof routeData[typeof method], undefined>)(c)
+          const mainHandler = (routeData[method] as Exclude<typeof routeData[typeof method], undefined>)
+          return await mainHandler(c)
         }
       }
       if (routeData.GET) {

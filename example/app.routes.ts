@@ -11,7 +11,6 @@ export const AppRoutes = class extends routes(appSpecs) implements Routes<typeof
     })
     .POST(async c => {
       const req = await c.req.json()
-      console.log(req)
       return c.json({
         message: `You said ${req.x}`
       })
