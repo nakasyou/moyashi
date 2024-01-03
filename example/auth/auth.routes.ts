@@ -3,7 +3,7 @@ import { authSpecs } from "./auth.specs"
 
 export const AuthRoutes = class extends routes(authSpecs) implements Routes<typeof authSpecs> {
   login = this.route()
-    .POST(async c => {
+    .post(async c => {
       const req = await c.req.json()
       return c.json({
         a: 0

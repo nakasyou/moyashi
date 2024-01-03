@@ -4,7 +4,7 @@ import { appMod } from './app.mod'
 const client = createClient<typeof appMod>('http://localhost:3030')
 
 while (true) {
-  const res = await client.$app.greet.POST('/:name', {
+  const res = await client.$app.greet.post('/:name', {
     params: {
       name: 'aaaa'
     },

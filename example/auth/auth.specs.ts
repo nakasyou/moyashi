@@ -5,7 +5,7 @@ export const authSpecs = {
   login: {
     path: '/login',
 
-    POST: {
+    post: {
       in: {
         json: v.object({
           uid: v.string(),

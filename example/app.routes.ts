@@ -8,12 +8,12 @@ export const AppRoutes = class extends routes(appSpecs) implements Routes<typeof
         error: 'Bad Request...'
       }, 500)
     })
-    .GET(c => {
+    .get(c => {
       return c.json({
         text: c.req.param('name')
       })
     })
-    .POST(async c => {
+    .post(async c => {
       const req = await c.req.json()
       return c.json({
         text: `Hello, ${c.req.param('name')}`,

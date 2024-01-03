@@ -5,7 +5,7 @@ export const appSpecs = {
   greet: {
     path: '/:name',
 
-    GET: {
+    get: {
       in: {},
       200: {
         json: v.object({
@@ -13,7 +13,7 @@ export const appSpecs = {
         })
       }
     },
-    POST: {
+    post: {
       in: {
         json: v.object({
           content: v.string()

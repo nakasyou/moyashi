@@ -19,7 +19,6 @@ export type InvalidHandler<T extends keyof InputTargets, Path extends string> = 
   issues: v.Issue[],
   c: Context<Env, Path>
 ) => Promise<Response> | Response
-
 export type RouteStack<Path extends string, SpecType extends Spec> = {
   [K in Method]: HandleFunc<Path, K, SpecType>
 } & {
