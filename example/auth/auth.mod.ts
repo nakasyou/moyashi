@@ -1,12 +1,9 @@
-import { mod } from "../../src"
-import { adminMod } from "./admin/main.mod"
-import { AuthRoutes } from "./auth.routes"
+import { mod } from '../../src'
+import { AuthRoutes } from './auth.routes'
 
 export const authMod = mod({
   basePath: '/auth',
-  mods: {
-    admin: adminMod
-  },
+  mods: {},
   routes: {
     main: new AuthRoutes()
   }

@@ -2,25 +2,28 @@ import { Specs } from "../src"
 import * as v from 'valibot'
 
 export const appSpecs = {
-  a: {
-    path: '/:aa',
+  greet: {
+    path: '/:name',
 
+    GET: {
+      in: {},
+      200: {
+        json: v.object({
+          text: v.string()
+        })
+      }
+    },
     POST: {
       in: {
         json: v.object({
-          x: v.number()
+          content: v.string()
         })
       },
       200: {
         json: v.object({
-          message: v.string()
+          text: v.string()
         })
       },
-      202: {
-        json: v.object({
-          mes: v.string()
-        })
-      }
     }
   }
 } as const satisfies Specs

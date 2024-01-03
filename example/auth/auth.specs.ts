@@ -6,13 +6,13 @@ export const authSpecs = {
     path: '/login',
 
     POST: {
-      i: {
+      in: {
         json: v.object({
           uid: v.string(),
           password: v.string()
         })
       },
-      o: {
+      200: {
         json: v.object({
           a: v.number()
         })

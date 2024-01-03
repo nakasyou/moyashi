@@ -1,18 +1,23 @@
-import { TypedResponsesBySpec, Routes, routes } from "../src"
+import { Routes, routes } from "../src"
 import { appSpecs } from "./app.specs"
 
 export const AppRoutes = class extends routes(appSpecs) implements Routes<typeof appSpecs> {
-  a = this.route()
+  greet = this.route()
     .invalid('json', (rawInput, issues,  c) => {
       return c.json({
         error: 'Bad Request...'
       }, 500)
     })
+    .GET(c => {
+      return c.json({
+        text: c.req.param('name')
+      })
+    })
     .POST(async c => {
       const req = await c.req.json()
-      console.log(c.req.param())
       return c.json({
-        mes: "10"
-      }, 202)
+        text: `Hello, ${c.req.param('name')}`,
+        content: req.content
+      })
     })
 }

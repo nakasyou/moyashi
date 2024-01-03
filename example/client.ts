@@ -1,17 +1,15 @@
 import { createClient } from '../src/client'
 import { appMod } from './app.mod'
 
-const client = createClient<typeof appMod>('http://localhost:3030', {})
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const client = createClient<typeof appMod>('http://localhost:3030')
 
 while (true) {
-  const res = await client.$app.a.POST('/:aa', {
+  const res = await client.$app.greet.POST('/:name', {
     params: {
-      aa: 'aaaa'
+      name: 'aaaa'
     },
     json: {
-      x: 0
+      content: 'aaa'
     }
   })
   console.log(await res.json())
