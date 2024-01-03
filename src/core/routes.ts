@@ -1,14 +1,16 @@
 import { Context, Env, Hono, HonoRequest } from 'hono'
-import { Specs, Method, Spec, InputTargets } from '.'
+import { Specs, Spec, InputTargets } from '.'
+import { methods, type Method } from '../types'
 import * as v from 'valibot'
 import { emptyHono } from '../emptyrouter'
-
+import type { NonUndefined, SafeValibotInput } from '../types'
 export type Routes<SpecsType extends Specs> = {
   [K in keyof SpecsType]: RouteStack<SpecsType[K]['path'], SpecsType[K]>
 }
-
-export type JsonResponse <T> = Response & {
-  json?: T
+export type JsonResponse <T, Status extends number> = Omit<Response, 'status' | 'json'> & {
+  jsonData?: T
+  status: Status
+  json (): Promise<T>
 }
 export type HandleFunc<Path extends string, MethodType extends Method, SpecType extends Spec> = (handler: Handler<Path, MethodType, SpecType>) => RouteStack<Path, SpecType>
 
@@ -27,17 +29,40 @@ export type RouteStack<Path extends string, SpecType extends Spec> = {
 
 type Promiseable<T> = Promise<T> | T
 export type ExtendedContext<Path extends string, MethodType extends Method, SpecType extends Spec> = Omit<Context<Env, Path>, 'json' | 'req'> & {
-  json <T extends undefined extends Exclude<SpecType[MethodType], undefined>['o']['json'] ? never : v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['o']['json'], undefined>>> (data: T): JsonResponse<T>
+  json <
+    JsonType extends (
+      SafeValibotInput<
+        NonUndefined<NonUndefined<
+          SpecType[MethodType]
+        >[StatusCode]>['json']
+      >
+    ),
+    StatusCode extends (keyof NonUndefined<SpecType[MethodType]> & number) = 200,
+  > (data: JsonType, statusCode?: StatusCode): JsonResponse<JsonType, StatusCode>
+
   req: Omit<HonoRequest<Path>, 'json'> & {
     json (): Promise<
-    // @ts-expect-error わからん
-      v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['i']['json'], undefined>>
+      SafeValibotInput<NonUndefined<SpecType[MethodType]>['in']['json']>
     >
+    queries (): SafeValibotInput<NonUndefined<SpecType[MethodType]>['in']['queries']>
   }
 }
+export type TypedResponsesBySpec <Outs extends Required<Spec>[Method]> = 
+  {
+    [Status in keyof Omit<Outs, 'in'>]:
+      Status extends number ?
+        NonUndefined<Outs[Status]>['json'] extends undefined ?
+          any :
+            JsonResponse<
+              SafeValibotInput<NonUndefined<Outs[Status]>['json']>,
+              Status
+            >
+        : never
+  }[keyof Omit<Outs, 'in'>]
 export type Handler<Path extends string, MethodType extends Method, SpecType extends Spec> = 
-  (c: ExtendedContext<Path, MethodType, SpecType>) => 
-    undefined extends Exclude<SpecType[MethodType], undefined>['o']['json'] ? Promise<Response> | Response : Promiseable<JsonResponse<v.Input<Exclude<Exclude<SpecType[MethodType], undefined>['o']['json'], undefined>>>>
+  (c: ExtendedContext<Path, MethodType, SpecType>) => Promiseable <
+    TypedResponsesBySpec<NonUndefined<SpecType[MethodType]>>
+  >
 
 export type RouteData = {
   [K in Method]?: Handler<string, Method, Spec>
@@ -62,21 +87,20 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
       return this as RouteStack
     }
 
+    const methodHandleFuncs: Partial<Record<Method, HandleFunc<SpecsType[Key]['path'], any, any>>> = {}
+    for (const method of methods) {
+      methodHandleFuncs[method] = byMethod(method)
+    }
     return {
-      GET: byMethod('GET'),
-      POST: byMethod('POST'),
       routeData,
       invalid (target, invalidHandler) {
         routeData.invalid[target] = invalidHandler
         return this
       },
+      ...(methodHandleFuncs as Required<typeof methodHandleFuncs>)
     }
   }
   _createHono () {
-    const methodsRecord: (Record<Method, keyof Hono>) = {
-      GET: 'get',
-      POST: 'post'
-    }
     const hono = emptyHono()
     for (const [specId, spec] of Object.entries(specs)) {
       const routeData = (this as Routes<SpecsType>)[specId].routeData
@@ -92,7 +116,7 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
       }> => {
         // JSON
         const validTarget = async (target: keyof InputTargets) => {
-          const schema = spec[method]?.i[target]
+          const schema = spec[method]?.in[target]
           if (schema) {
             const data = await c.req[target]()
             const dataParsed = await v.safeParseAsync(schema, data)
@@ -143,11 +167,8 @@ export const routes = <SpecsType extends Specs>(specs: SpecsType) => class Route
           return await mainHandler(c)
         }
       }
-      if (routeData.GET) {
-        hono.get(spec.path, handler('GET'))
-      }
-      if (routeData.POST) {
-        hono.post(spec.path, handler('POST'))
+      for (const method of methods) {
+        hono[method.toLowerCase() as (Lowercase<typeof method>)](spec.path, handler(method))
       }
     }
     return hono

@@ -1,21 +1,26 @@
-import { Specs, queries, specs } from "../src"
+import { Specs } from "../src"
 import * as v from 'valibot'
 
-export const appSpecs = specs({
+export const appSpecs = {
   a: {
     path: '/:aa',
 
     POST: {
-      i: {
+      in: {
         json: v.object({
           x: v.number()
         })
       },
-      o: {
+      200: {
         json: v.object({
           message: v.string()
+        })
+      },
+      202: {
+        json: v.object({
+          mes: v.string()
         })
       }
     }
   }
-} as const)
+} as const satisfies Specs

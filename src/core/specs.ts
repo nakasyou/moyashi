@@ -1,7 +1,5 @@
 import * as v from 'valibot'
-
-export type Method = 'GET' | 'POST'
-export const methods: Method[] = ['GET', 'POST']
+import type { Method } from '../types'
 
 export const queries = <T extends Record<string, v.ArraySchema<v.StringSchema<string>, string[]>>>(keys: T) => v.object(keys)
 
@@ -32,21 +30,20 @@ interface Out<
 > {
   json?: Json
 }
-export interface SpecMethod<
+
+export type MethodSpec <
   MethodType extends Method,
-  InType extends In<MethodType> = In<MethodType>,
-  OutType extends Out<MethodType> = Out<MethodType>
-> {
-  i: InType
-  o: OutType
+  InType extends In<MethodType> = In<MethodType>
+> = {
+  [statusCode: number]: Out<MethodType> | undefined
+} & {
+  in: InType
 }
 export type Spec<Path extends string = string> = {
-  [K in Method]?: SpecMethod<K>
+  [K in Method]?: MethodSpec<K>
 } & {
   path: Path
 }
 export interface Specs {
   [id: string]: Spec
 }
-
-export const specs = <T extends Specs>(specs: T): T => specs

@@ -2,5 +2,6 @@
     "[typescript]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true
-    }
+    },
+    "discord.enabled": true
 }

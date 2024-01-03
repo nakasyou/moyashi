@@ -1,7 +1,7 @@
-import { Specs, queries, specs } from "../../src"
+import { Specs } from "../../src"
 import * as v from 'valibot'
 
-export const authSpecs = specs({
+export const authSpecs = {
   login: {
     path: '/login',
 
@@ -19,4 +19,4 @@ export const authSpecs = specs({
       }
     }
   }
-} as const)
+} as const satisfies Specs
